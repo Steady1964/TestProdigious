@@ -2,6 +2,8 @@ package com.test.controller;
 
 import java.util.List;
 
+import org.json.JSONObject;
+import org.json.XML;
 // import org.json.JSONObject;
 // import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,12 +63,15 @@ public class AppRestController {
 		if (format.equals("json")) {
 			System.out.println("Ok JSON");
 			httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+		} else {
+			return etlResponseForXmlCharge(festivitie, httpHeaders);
 		}
 		if (festivitie == null) {
 			System.out.println("Festivitie with id " + id + " not found");
 			return new ResponseEntity<Object>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<Object>(festivitie, httpHeaders, HttpStatus.OK);
+		return new ResponseEntity<Object>(festivitie, httpHeaders,
+				HttpStatus.OK);
 	}
 
 	/**
@@ -126,7 +131,8 @@ public class AppRestController {
 	 * @return
 	 */
 	@RequestMapping(value = "/festivitie/{id}", method = RequestMethod.DELETE)
-	public ResponseEntity<Festivities> deleteFestivitie(@PathVariable("id") long id) {
+	public ResponseEntity<Festivities> deleteFestivitie(
+			@PathVariable("id") long id) {
 		System.out.println("Fetching & Deleting Festivitie with id " + id);
 
 		Festivities festivitie = festivitiesService.findById(id);
@@ -150,6 +156,22 @@ public class AppRestController {
 
 		festivitiesService.deleteAllFestivities();
 		return new ResponseEntity<Festivities>(HttpStatus.NO_CONTENT);
+	}
+
+	/**
+	 * Return Response in Xml
+	 * @return ResponseEntity<Object> Response With Object XML
+	 */
+	public ResponseEntity<Object> etlResponseForXmlCharge(
+			Festivities festivitie, HttpHeaders httpHeaders) {
+
+		String aux[] = festivitie.toString().split("Festivitie");
+		System.out.println("Ok Xml: " + aux[aux.length - 1]);
+		JSONObject json = new JSONObject(aux[aux.length - 1]);
+		String xml = "<festivitie>" + XML.toString(json) + "</festivitie>";
+		System.out.println("xml data: \n" + xml);
+		httpHeaders.setContentType(MediaType.APPLICATION_XML);
+		return new ResponseEntity<Object>(xml, httpHeaders, HttpStatus.OK);
 	}
 
 }

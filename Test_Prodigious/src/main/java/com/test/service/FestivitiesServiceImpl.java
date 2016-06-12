@@ -77,13 +77,13 @@ public class FestivitiesServiceImpl implements FestivitiesService {
 		List<Festivities> festivitie = new ArrayList<Festivities>();
 
 		festivitie.add(new Festivities(counter.incrementAndGet(), "Sam",
-				"bogota", "11/08/2016", "11/08/2016"));
+				"bogota", "11-08-2016", "11-08-2016"));
 		festivitie.add(new Festivities(counter.incrementAndGet(), "Tom",
-				"bogota", "11/08/2016", "11/08/2016"));
+				"bogota", "11-08-2016", "11-08-2016"));
 		festivitie.add(new Festivities(counter.incrementAndGet(), "Jerome",
-				"bogota", "11/08/2016", "11/08/2016"));
+				"bogota", "11-08-2016", "11-08-2016"));
 		festivitie.add(new Festivities(counter.incrementAndGet(), "Silvia",
-				"bogota", "11/08/2016", "11/08/2016"));
+				"bogota", "11-08-2016", "11-08-2016"));
 
 		return festivitie;
 	}

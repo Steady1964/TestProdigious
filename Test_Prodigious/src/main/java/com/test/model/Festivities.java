@@ -110,7 +110,7 @@ public class Festivities {
 
 	@Override
 	public String toString() {
-		return "User {id:" + id + ", name:" + name + ", place:" + place + ", dateStart:" + dateStart + ", dateEnd:" + dateEnd + "}";
+		return "Festivitie {id:" + id + ", name:" + name + ", place:" + place + ", dateStart:" + dateStart + ", dateEnd:" + dateEnd + "}";
 	}
 
 }
