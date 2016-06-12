@@ -1,8 +1,8 @@
-package main.java.com.test.service;
+package com.test.service;
 
 import java.util.List;
 
-import main.java.com.test.model.Festivities;
+import com.test.model.Festivities;
 
 
 
@@ -12,16 +12,16 @@ public interface FestivitiesService {
 	
 	Festivities findByName(String name);
 	
-	void saveUser(Festivities user);
+	void saveFestivitie(Festivities user);
 	
-	void updateUser(Festivities user);
+	void updateFestivitie(Festivities festivitie);
 	
-	void deleteUserById(long id);
+	void deleteByFestivitieId(long id);
 
-	List<Festivities> findAllUsers(); 
+	List<Festivities> findAllFestivities(); 
 	
-	void deleteAllUsers();
+	void deleteAllFestivities();
 	
-	public boolean isUserExist(Festivities user);
+	public boolean isFestivitieExist(Festivities user);
 	
 }

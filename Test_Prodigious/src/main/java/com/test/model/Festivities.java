@@ -1,4 +1,4 @@
-package main.java.com.test.model;
+package com.test.model;
 
 
 public class Festivities {

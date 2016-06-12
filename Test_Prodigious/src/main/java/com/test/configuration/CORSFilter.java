@@ -1,7 +1,7 @@
 /*
  * 
  */
-package main.java.com.test.configuration;
+package com.test.configuration;
 
 import java.io.IOException;
 
