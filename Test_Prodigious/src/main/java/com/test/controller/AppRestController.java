@@ -1,11 +1,10 @@
 package com.test.controller;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.json.JSONObject;
 import org.json.XML;
-// import org.json.JSONObject;
-// import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -54,15 +53,15 @@ public class AppRestController {
 	 * type
 	 */
 	@RequestMapping(value = "/festivitie/{id}", method = RequestMethod.GET, produces = {
-			MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+			MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<Object> getFestivitie(@PathVariable("id") long id,
 			@RequestParam String format) {
 		System.out.println("Fetching Festitivitie with id " + id);
 		HttpHeaders httpHeaders = new HttpHeaders();
+		createData();
 		Festivities festivitie = festivitiesService.findById(id);
 		if (format.equals("json")) {
 			System.out.println("Ok JSON");
-			httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 		} else {
 			return etlResponseForXmlCharge(festivitie, httpHeaders);
 		}
@@ -80,7 +79,7 @@ public class AppRestController {
 	 * @param ucBuilder
 	 * @return
 	 */
-	@RequestMapping(value = "/festivitie/", method = RequestMethod.POST)
+	@RequestMapping(value = "/festivitie/", method = RequestMethod.POST, consumes= MediaType.APPLICATION_XML_VALUE)
 	public ResponseEntity<Void> createFestivitie(
 			@RequestBody Festivities festivitie,
 			UriComponentsBuilder ucBuilder) {
@@ -91,6 +90,7 @@ public class AppRestController {
 					+ " already exist");
 			return new ResponseEntity<Void>(HttpStatus.CONFLICT);
 		}
+
 		festivitiesService.saveFestivitie(festivitie);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setLocation(ucBuilder.path("/festivitie/{id}")
@@ -168,10 +168,22 @@ public class AppRestController {
 		String aux[] = festivitie.toString().split("Festivitie");
 		System.out.println("Ok Xml: " + aux[aux.length - 1]);
 		JSONObject json = new JSONObject(aux[aux.length - 1]);
-		String xml = "<festivitie>" + XML.toString(json) + "</festivitie>";
+		String xml = "<festivity>" + XML.toString(json) + "</festivity>";
 		System.out.println("xml data: \n" + xml);
 		httpHeaders.setContentType(MediaType.APPLICATION_XML);
 		return new ResponseEntity<Object>(xml, httpHeaders, HttpStatus.OK);
+	}
+
+	public void createData() {
+
+		AtomicLong counter = new AtomicLong();
+		festivitiesService
+				.saveFestivitie(new Festivities(counter.incrementAndGet(),
+						"Sam", "bogota", "11-08-2016", "11-08-2016"));
+		festivitiesService
+				.saveFestivitie(new Festivities(counter.incrementAndGet(),
+						"Tom", "bogota", "11-08-2016", "11-08-2016"));
+
 	}
 
 }

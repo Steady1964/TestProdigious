@@ -1,31 +1,40 @@
 package com.test.service;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.test.model.Festivities;
+import com.test.repo.FestivitiesContext;
 
 @Service("festivitiesService")
 @Transactional
 public class FestivitiesServiceImpl implements FestivitiesService {
 
 	private static final AtomicLong counter = new AtomicLong();
+	private static FestivitiesContext festivitieContext;
 
 	private static List<Festivities> festivities;
 
 	static {
-		festivities = populateDummyFestivities();
+		festivitieContext = getBeanContext();
+		festivities = (List<Festivities>) festivitieContext.findAll();
 	}
 
 	public List<Festivities> findAllFestivities() {
 		return festivities;
 	}
 
+	/*
+	 * Method that retrieve a Festivitie by id
+	 * @param id Id of the record
+	 * @return return the Festivitie Object
+	 */
 	public Festivities findById(long id) {
 		for (Festivities festivitie : festivities) {
 			if (festivitie.getId() == id) {
@@ -45,8 +54,10 @@ public class FestivitiesServiceImpl implements FestivitiesService {
 	}
 
 	public void saveFestivitie(Festivities festivitie) {
+		counter.set(festivities.size());
 		festivitie.setId(counter.incrementAndGet());
-		festivities.add(festivitie);
+		festivitieContext.save(festivitie);
+		reloadFestivitiesList();
 	}
 
 	public void updateFestivitie(Festivities festivitie) {
@@ -73,19 +84,21 @@ public class FestivitiesServiceImpl implements FestivitiesService {
 		festivities.clear();
 	}
 
-	private static List<Festivities> populateDummyFestivities() {
-		List<Festivities> festivitie = new ArrayList<Festivities>();
-
-		festivitie.add(new Festivities(counter.incrementAndGet(), "Sam",
-				"bogota", "11-08-2016", "11-08-2016"));
-		festivitie.add(new Festivities(counter.incrementAndGet(), "Tom",
-				"bogota", "11-08-2016", "11-08-2016"));
-		festivitie.add(new Festivities(counter.incrementAndGet(), "Jerome",
-				"bogota", "11-08-2016", "11-08-2016"));
-		festivitie.add(new Festivities(counter.incrementAndGet(), "Silvia",
-				"bogota", "11-08-2016", "11-08-2016"));
-
-		return festivitie;
+	public static ClassPathXmlApplicationContext getContextCRUD() {
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+				new ClassPathResource("spring-config.xml").getPath());
+		return context;
 	}
 
+	public static FestivitiesContext getBeanContext() {
+		ClassPathXmlApplicationContext context = getContextCRUD();
+		FestivitiesContext festivitieContext = context
+				.getBean(FestivitiesContext.class);
+		return festivitieContext;
+	}
+	
+	public void reloadFestivitiesList(){
+		festivities.clear();
+		festivities = (List<Festivities>) festivitieContext.findAll();	
+	}
 }

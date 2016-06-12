@@ -1,9 +1,14 @@
 package com.test.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Document(collection = "festivities")
 public class Festivities {
 
 	/** The id. */
+	@Id
 	private long id;
 
 	/** The name. */
@@ -25,7 +30,7 @@ public class Festivities {
 		id = 0;
 	}
 
-
+	@PersistenceConstructor
 	public Festivities(long id, String name, String place, String dateStart, String dateEnd) {
 		this.id = id;
 		this.name = name;
@@ -110,7 +115,7 @@ public class Festivities {
 
 	@Override
 	public String toString() {
-		return "Festivitie {id:" + id + ", name:" + name + ", place:" + place + ", dateStart:" + dateStart + ", dateEnd:" + dateEnd + "}";
+		return "Festivitie {id:" + id + ", name:" + name + ", place:" + place + ", start:" + dateStart + ", end:" + dateEnd + "}";
 	}
 
 }
