@@ -7,8 +7,9 @@
           http://www.springframework.org/schema/data/mongo
           http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
           http://www.springframework.org/schema/beans
-          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
-
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+          http://www.springframework.org/schema/mvc
+          http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
 	<!-- Default bean name is 'mongo' -->
 	<mongo:mongo id="mongo" host="localhost" port="27017" />
 
@@ -17,4 +18,5 @@
 		<constructor-arg name="databaseName" value="jcg" />
 	</bean>
 	<mongo:repositories base-package="com.test.repo"></mongo:repositories>
+
 </beans>

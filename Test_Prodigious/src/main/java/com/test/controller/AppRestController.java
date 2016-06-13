@@ -22,7 +22,8 @@ import com.test.model.Festivities;
 import com.test.service.FestivitiesService;
 
 /**
- * @author johan vargas
+ * AppRestController.java
+ * @author Johan Vargas 12/06/2016
  */
 @RestController
 public class AppRestController {
@@ -37,12 +38,18 @@ public class AppRestController {
 	 */
 	@RequestMapping(value = "/festivitie/", method = RequestMethod.GET)
 	public ResponseEntity<List<Festivities>> listAllFestivities() {
-		List<Festivities> festivities = festivitiesService.findAllFestivities();
-		if (festivities.isEmpty()) {
-			return new ResponseEntity<List<Festivities>>(HttpStatus.NO_CONTENT);
+		try {
+			List<Festivities> festivities = festivitiesService
+					.findAllFestivities();
+			if (festivities.isEmpty()) {
+				return new ResponseEntity<List<Festivities>>(
+						HttpStatus.NO_CONTENT);
+			}
+			return new ResponseEntity<List<Festivities>>(festivities,
+					getMessageStatus(200));
+		} catch (Exception e) {
+			return new ResponseEntity<List<Festivities>>(getMessageStatus(500));
 		}
-		return new ResponseEntity<List<Festivities>>(festivities,
-				HttpStatus.OK);
 	}
 
 	/**
@@ -56,21 +63,27 @@ public class AppRestController {
 			MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<Object> getFestivitie(@PathVariable("id") long id,
 			@RequestParam String format) {
-		System.out.println("Fetching Festitivitie with id " + id);
-		HttpHeaders httpHeaders = new HttpHeaders();
-		createData();
-		Festivities festivitie = festivitiesService.findById(id);
-		if (format.equals("json")) {
-			System.out.println("Ok JSON");
-		} else {
-			return etlResponseForXmlCharge(festivitie, httpHeaders);
+
+		try {
+			System.out.println("Fetching Festitivitie with id " + id);
+			HttpHeaders httpHeaders = new HttpHeaders();
+			//createData();
+			Festivities festivitie = festivitiesService.findById(id);
+			if (format.equals("json")) {
+				System.out.println("Ok JSON");
+			} else {
+				return etlResponseForXmlCharge(festivitie, httpHeaders);
+			}
+			if (festivitie == null) {
+				System.out.println("Festivitie with id " + id + " not found");
+				return new ResponseEntity<Object>(getMessageStatus(404));
+			}
+			return new ResponseEntity<Object>(festivitie, httpHeaders,
+					getMessageStatus(200));
+
+		} catch (Exception e) {
+			return new ResponseEntity<Object>(getMessageStatus(500));
 		}
-		if (festivitie == null) {
-			System.out.println("Festivitie with id " + id + " not found");
-			return new ResponseEntity<Object>(HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<Object>(festivitie, httpHeaders,
-				HttpStatus.OK);
 	}
 
 	/**
@@ -79,50 +92,59 @@ public class AppRestController {
 	 * @param ucBuilder
 	 * @return
 	 */
-	@RequestMapping(value = "/festivitie/", method = RequestMethod.POST, consumes= MediaType.APPLICATION_XML_VALUE)
+	@RequestMapping(value = "/festivitie/", method = RequestMethod.POST, headers = "content-type=application/*")
 	public ResponseEntity<Void> createFestivitie(
 			@RequestBody Festivities festivitie,
 			UriComponentsBuilder ucBuilder) {
-		System.out.println("Creating Festivitie " + festivitie.getName());
 
-		if (festivitiesService.isFestivitieExist(festivitie)) {
-			System.out.println("A Festivitie with name " + festivitie.getName()
-					+ " already exist");
-			return new ResponseEntity<Void>(HttpStatus.CONFLICT);
+		try {
+			System.out.println("Creating Festivitie " + festivitie.getName());
+			if (festivitie.getName() == null) {
+				return new ResponseEntity<Void>(getMessageStatus(400));
+			}
+			if (festivitiesService.isFestivitieExist(festivitie)) {
+				System.out.println("A Festivitie with name "
+						+ festivitie.getName() + " already exist");
+				return new ResponseEntity<Void>(HttpStatus.CONFLICT);
+			}
+			festivitiesService.saveFestivitie(festivitie);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setLocation(ucBuilder.path("/festivitie/{id}")
+					.buildAndExpand(festivitie.getId()).toUri());
+			return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<Void>(getMessageStatus(500));
 		}
 
-		festivitiesService.saveFestivitie(festivitie);
-		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(ucBuilder.path("/festivitie/{id}")
-				.buildAndExpand(festivitie.getId()).toUri());
-		return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
 	}
 
 	/**
 	 * Update a Festivitie by Id
 	 * @param id
 	 * @param festivitie
-	 * @return
+	 * @return ResponseEntity<Festivities> response a festivitie updated
 	 */
 	@RequestMapping(value = "/festivitie/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<Festivities> updateFestivitie(
 			@PathVariable("id") long id, @RequestBody Festivities festivitie) {
-		System.out.println("Updating festivitie " + id);
 
-		Festivities currentFestivitie = festivitiesService.findById(id);
-
-		if (currentFestivitie == null) {
-			System.out.println("Festivitie with id " + id + " not found");
-			return new ResponseEntity<Festivities>(HttpStatus.NOT_FOUND);
+		try {
+			System.out.println("Updating festivitie " + id);
+			Festivities currentFestivitie = festivitiesService.findById(id);
+			if (currentFestivitie == null) {
+				System.out.println("Festivitie with id " + id + " not found");
+				return new ResponseEntity<Festivities>(getMessageStatus(404));
+			}
+			currentFestivitie.setName(festivitie.getName());
+			currentFestivitie.setDateEnd(festivitie.getDateEnd());
+			currentFestivitie.setDateStart(festivitie.getDateStart());
+			festivitiesService.updateFestivitie(currentFestivitie);
+			return new ResponseEntity<Festivities>(currentFestivitie,
+					getMessageStatus(200));
+		} catch (Exception e) {
+			return new ResponseEntity<Festivities>(getMessageStatus(500));
 		}
 
-		currentFestivitie.setName(festivitie.getName());
-		currentFestivitie.setDateEnd(festivitie.getDateEnd());
-		currentFestivitie.setDateStart(festivitie.getDateStart());
-
-		festivitiesService.updateFestivitie(currentFestivitie);
-		return new ResponseEntity<Festivities>(currentFestivitie,
-				HttpStatus.OK);
 	}
 
 	/**
@@ -133,17 +155,21 @@ public class AppRestController {
 	@RequestMapping(value = "/festivitie/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Festivities> deleteFestivitie(
 			@PathVariable("id") long id) {
-		System.out.println("Fetching & Deleting Festivitie with id " + id);
+		try {
+			System.out.println("Fetching & Deleting Festivitie with id " + id);
 
-		Festivities festivitie = festivitiesService.findById(id);
-		if (festivitie == null) {
-			System.out.println("Unable to delete. Festivitie with id " + id
-					+ " not found");
-			return new ResponseEntity<Festivities>(HttpStatus.NOT_FOUND);
+			Festivities festivitie = festivitiesService.findById(id);
+			if (festivitie == null) {
+				System.out.println("Unable to delete. Festivitie with id " + id
+						+ " not found");
+				return new ResponseEntity<Festivities>(HttpStatus.NOT_FOUND);
+			}
+			festivitiesService.deleteByFestivitieId(id);
+			return new ResponseEntity<Festivities>(HttpStatus.NO_CONTENT);
+		} catch (Exception e) {
+			return new ResponseEntity<Festivities>(getMessageStatus(500));
 		}
 
-		festivitiesService.deleteByFestivitieId(id);
-		return new ResponseEntity<Festivities>(HttpStatus.NO_CONTENT);
 	}
 
 	/**
@@ -164,16 +190,23 @@ public class AppRestController {
 	 */
 	public ResponseEntity<Object> etlResponseForXmlCharge(
 			Festivities festivitie, HttpHeaders httpHeaders) {
-
-		String aux[] = festivitie.toString().split("Festivitie");
-		System.out.println("Ok Xml: " + aux[aux.length - 1]);
-		JSONObject json = new JSONObject(aux[aux.length - 1]);
-		String xml = "<festivity>" + XML.toString(json) + "</festivity>";
-		System.out.println("xml data: \n" + xml);
-		httpHeaders.setContentType(MediaType.APPLICATION_XML);
-		return new ResponseEntity<Object>(xml, httpHeaders, HttpStatus.OK);
+		try {
+			String aux[] = festivitie.toString().split("Festivitie");
+			System.out.println("Ok Xml: " + aux[aux.length - 1]);
+			JSONObject json = new JSONObject(aux[aux.length - 1]);
+			String xml = "<festivity>" + XML.toString(json) + "</festivity>";
+			System.out.println("xml data: \n" + xml);
+			httpHeaders.setContentType(MediaType.APPLICATION_XML);
+			return new ResponseEntity<Object>(xml, httpHeaders,
+					getMessageStatus(200));
+		} catch (Exception e) {
+			return new ResponseEntity<Object>(getMessageStatus(500));
+		}
 	}
 
+	/**
+	 * Method to set data test
+	 */
 	public void createData() {
 
 		AtomicLong counter = new AtomicLong();
@@ -184,6 +217,31 @@ public class AppRestController {
 				.saveFestivitie(new Festivities(counter.incrementAndGet(),
 						"Tom", "bogota", "11-08-2016", "11-08-2016"));
 
+	}
+
+	/**
+	 * Provide the message of the code to set to view
+	 * @param codeSource code error standard
+	 * @return
+	 */
+	public HttpStatus getMessageStatus(int codeSource) {
+		//200 For successful searches
+		if (codeSource == 200) {
+			return HttpStatus.OK;
+		}
+		//400 To report missing data when trying to create a new festivity
+		if (codeSource == 400) {
+			return HttpStatus.BAD_REQUEST;
+		}
+		//404 For searches that return no results
+		if (codeSource == 404) {
+			return HttpStatus.BAD_REQUEST;
+		}
+		//500 For any errors that happen in a layer below the REST API layer
+		if (codeSource == 404) {
+			return HttpStatus.INTERNAL_SERVER_ERROR;
+		}
+		return null;
 	}
 
 }

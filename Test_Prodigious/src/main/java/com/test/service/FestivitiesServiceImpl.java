@@ -1,6 +1,5 @@
 package com.test.service;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -61,19 +60,12 @@ public class FestivitiesServiceImpl implements FestivitiesService {
 	}
 
 	public void updateFestivitie(Festivities festivitie) {
-		int index = festivities.indexOf(festivitie);
-		festivities.set(index, festivitie);
+		Festivities index = findById(festivitie.getId());
+		festivitieContext.save(index);
 	}
 
 	public void deleteByFestivitieId(long id) {
-
-		for (Iterator<Festivities> iterator = festivities.iterator(); iterator
-				.hasNext();) {
-			Festivities festivitie = iterator.next();
-			if (festivitie.getId() == id) {
-				iterator.remove();
-			}
-		}
+		festivitieContext.delete(id);		
 	}
 
 	public boolean isFestivitieExist(Festivities festivitie) {
@@ -82,6 +74,7 @@ public class FestivitiesServiceImpl implements FestivitiesService {
 
 	public void deleteAllFestivities() {
 		festivities.clear();
+		festivitieContext.deleteAll();
 	}
 
 	public static ClassPathXmlApplicationContext getContextCRUD() {
@@ -96,9 +89,9 @@ public class FestivitiesServiceImpl implements FestivitiesService {
 				.getBean(FestivitiesContext.class);
 		return festivitieContext;
 	}
-	
-	public void reloadFestivitiesList(){
+
+	public void reloadFestivitiesList() {
 		festivities.clear();
-		festivities = (List<Festivities>) festivitieContext.findAll();	
+		festivities = (List<Festivities>) festivitieContext.findAll();
 	}
 }

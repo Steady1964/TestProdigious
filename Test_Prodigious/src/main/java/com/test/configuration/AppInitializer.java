@@ -4,6 +4,11 @@ import javax.servlet.Filter;
 
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+/**
+ * Initialized all the objects to servlet functions
+ * @author Johan Vargas
+ *
+ */
 public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
  
     @Override

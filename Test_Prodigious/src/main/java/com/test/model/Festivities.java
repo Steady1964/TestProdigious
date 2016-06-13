@@ -1,9 +1,11 @@
 package com.test.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+@XmlRootElement
 @Document(collection = "festivities")
 public class Festivities {
 
